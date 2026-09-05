@@ -1,0 +1,84 @@
+.office-area-wrapper {
+    padding: 24px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.office-selector h2 {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0F172A;
+}
+
+.office-address h4 {
+    font-weight: 400;
+    font-size: 13px;
+    color: #475569;
+}
+
+.office-address span {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 1000px;
+    background: #94A3B8;
+}
+
+.office-address {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.date-selector {
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.date-selector-item h5 {
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 11px;
+    color: #94A3B8;
+}
+
+.date-selector-field {
+    width: fit-content;
+    padding: 10px 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-selector-field p {
+    font-weight: 400;
+    font-size: 14px;
+    color: #0F172A;
+}
+
+.date-selector-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.available-rooms {
+    background: #F8FAFC;
+    padding: 40px;
+}
+
+.av-rooms-title {
+    font-weight: 800;
+    font-size: 22px;
+    color: #0F172A;
+    margin-bottom: 32px;
+}
