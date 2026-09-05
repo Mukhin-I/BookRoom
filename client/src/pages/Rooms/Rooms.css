@@ -69,6 +69,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+    position: relative;
 }
 
 .available-rooms {
@@ -81,4 +82,77 @@
     font-size: 22px;
     color: #0F172A;
     margin-bottom: 32px;
+}
+
+
+.date-selector-field.pointer {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+    min-width: 140px;
+}
+
+.date-selector-field.active {
+    border-color: #94A3B8;
+}
+
+.chevron {
+    color: #475569;
+    font-size: 16px;
+    line-height: 1;
+    transform: translateY(-2px);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 8px;
+    width: max-content;
+    min-width: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #0F172A;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #F1F5F9;
+}
+
+.dropdown-item.selected {
+    background: #CCFAF1;
+}
+
+.checkmark {
+    color: #059669;
+    font-weight: bold;
+}
+
+.time-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #0F172A;
+    width: 45px;
+    background: transparent;
+}
+.time-input::placeholder {
+    color: #94A3B8;
 }
