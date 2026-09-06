@@ -104,7 +104,15 @@
 
 .goto-room-details {
     color: #0D9488;
+    display: block;
+    width: 193px;
+    text-align: center;
+    border-radius: 8px;
     transition: 0.6s ease;
+    text-decoration: none;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .goto-room-details:hover {
