@@ -13,13 +13,19 @@ import { createBooking } from '../api/bookings'
 
 registerLocale('ru', ru)
 
+export interface BookingSuccessDetails {
+  roomName: string
+  dateStr: string
+  timeRangeStr: string
+}
+
 interface BookRoomModalProps {
   isOpen: boolean
   onClose: () => void
   room: Room
   initialDate?: Date
   initialStartTime?: string
-  onSuccess?: () => void
+  onSuccess?: (details: BookingSuccessDetails) => void
 }
 
 const DURATION_OPTIONS = [
@@ -63,14 +69,12 @@ export default function BookRoomModal({
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [comment, setComment] = useState('')
   
-  // Состояния для кастомного дропдауна
   const [isDurationOpen, setIsDurationOpen] = useState(false)
   const durationRef = useRef<HTMLDivElement>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  // Расчет времени и верхнего порога (20:00)
   const [hours, minutes] = startTime.split(':').map(Number)
   const startDateTime = new Date(date)
   startDateTime.setHours(hours || 0, minutes || 0, 0, 0)
@@ -82,20 +86,19 @@ export default function BookRoomModal({
   const endTimeStr = format(endDateTime, 'HH:mm')
   const isExceedingMaxTime = endDateTime > maxEndDateTime
 
-    const createOfficeDateTime = (
-        date: Date,
-        time: string,
-        timezone: string,
-        ) => {
-        const [hours, minutes] = time.split(':').map(Number)
+  const createOfficeDateTime = (
+    date: Date,
+    time: string,
+    timezone: string,
+  ) => {
+    const [hours, minutes] = time.split(':').map(Number)
+    const dateString = format(date, 'yyyy-MM-dd')
 
-        const dateString = format(date, 'yyyy-MM-dd')
-
-        return fromZonedTime(
-            `${dateString} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`,
-            timezone,
-        )
-    }
+    return fromZonedTime(
+      `${dateString} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`,
+      timezone,
+    )
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -132,7 +135,6 @@ export default function BookRoomModal({
 
   if (!isOpen) return null
 
-  // форматирование даты для плашки с подтверждением
   const formattedDay = format(startDateTime, 'EEEE', { locale: ru })
   const capitalizedDay =
     formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1)
@@ -142,47 +144,51 @@ export default function BookRoomModal({
     DURATION_OPTIONS.find((opt) => opt.value === durationMinutes) || DURATION_OPTIONS[3]
 
   const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    e.preventDefault()
 
-        if (!title.trim() || isExceedingMaxTime) return
+    if (!title.trim() || isExceedingMaxTime) return
 
-        try {
-            setIsSubmitting(true)
-            setSubmitError(null)
+    try {
+      setIsSubmitting(true)
+      setSubmitError(null)
 
-            const officeTimezone = room.office.timezone
+      const officeTimezone = room.office.timezone
 
-            const startsAt = createOfficeDateTime(
-            date,
-            startTime,
-            officeTimezone,
-            )
+      const startsAt = createOfficeDateTime(
+        date,
+        startTime,
+        officeTimezone,
+      )
 
-            const endsAt = addMinutes(
-            startsAt,
-            durationMinutes,
-            )
+      const endsAt = addMinutes(
+        startsAt,
+        durationMinutes,
+      )
 
-            await createBooking({
-            roomId: room.id,
-            title: title.trim(),
-            comment: comment.trim() || null,
-            startsAt: startsAt.toISOString(),
-            endsAt: endsAt.toISOString(),
-            })
+      await createBooking({
+        roomId: room.id,
+        title: title.trim(),
+        comment: comment.trim() || null,
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+      })
 
-            onSuccess?.()
-            onClose()
-        } catch (error) {
-            setSubmitError(
-            error instanceof Error
-                ? error.message
-                : 'Не удалось забронировать комнату. Попробуйте снова.',
-            )
-        } finally {
-            setIsSubmitting(false)
-        }
+      onSuccess?.({
+        roomName: room.name,
+        dateStr: formattedDateStr,
+        timeRangeStr: `${startTime}-${endTimeStr}`,
+      })
+      onClose()
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось забронировать комнату. Попробуйте снова.',
+      )
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -196,7 +202,6 @@ export default function BookRoomModal({
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {/* тема */}
           <div className="form-group">
             <label htmlFor="booking-title">
               Тема встречи <span className="required">*</span>
@@ -212,7 +217,6 @@ export default function BookRoomModal({
             />
           </div>
 
-          {/* дата и время начала */}
           <div className="form-row">
             <div className="form-group">
               <label>Дата</label>
@@ -248,7 +252,6 @@ export default function BookRoomModal({
             </div>
           </div>
 
-          {/* кастомная продолжительность */}
           <div className="form-group" ref={durationRef}>
             <label>Продолжительность</label>
             <div
@@ -293,7 +296,6 @@ export default function BookRoomModal({
             )}
           </div>
 
-          {/* комментарий */}
           <div className="form-group">
             <label>Комментарий</label>
             <textarea
@@ -305,7 +307,6 @@ export default function BookRoomModal({
             />
           </div>
 
-          {/* информационная плашка */}
           <div className="info-banner">
             <span className="info-icon">ⓘ</span>
             <span>
@@ -315,7 +316,6 @@ export default function BookRoomModal({
 
           {submitError && <div className="modal-error">{submitError}</div>}
 
-          {/* кнопки */}
           <div className="modal-actions">
             <button
               type="button"

@@ -8,6 +8,7 @@ import Header from '../../components/Header'
 import RoomDetailsCard from '../../components/RoomDetailsCard'
 import RoomCalendar from '../../components/RoomCalendar'
 import BookRoomModal from '../../components/BookRoomModal'
+import ToastNotification from '../../components/ToastNotification'
 
 export default function RoomDetails() {
   const { roomId } = useParams()
@@ -18,6 +19,8 @@ export default function RoomDetails() {
 
   const [isBookModalOpen, setIsBookModalOpen] = useState(false)
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
+
+  const [toast, setToast] = useState<{ title: string; message: string } | null>(null)
 
   const loadRoom = async () => {
     if (!roomId) {
@@ -64,6 +67,14 @@ export default function RoomDetails() {
     <div className="container">
       <Header />
 
+      {toast && (
+        <ToastNotification
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className="container">
         <nav className="breadcrumbs">
           <Link to="/rooms">Переговорные</Link>
@@ -94,8 +105,12 @@ export default function RoomDetails() {
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
           room={room}
-          onSuccess={() => {
+          onSuccess={({ roomName, dateStr, timeRangeStr }) => {
             setCalendarRefreshKey((prev) => prev + 1)
+            setToast({
+              title: 'Бронирование создано',
+              message: `Комната ${roomName}, ${dateStr}, ${timeRangeStr}`,
+            })
           }}
         />
       )}
