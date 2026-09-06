@@ -3,8 +3,8 @@ import { format, addMinutes } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import './BookRoomModal.css'
 import type { Room } from '../types/api'
-import calendarIcon from '../../assets/calendar.svg'
-import clockIcon from '../../assets/clock.svg'
+import calendarIcon from '../assets/calendar.svg'
+import clockIcon from '../assets/clock.svg'
 
 interface BookRoomModalProps {
   isOpen: boolean
@@ -50,7 +50,7 @@ export default function BookRoomModal({
 
   if (!isOpen) return null
 
-  // Расчет времени окончания
+  // расчет времени окончания
   const [hours, minutes] = startTime.split(':').map(Number)
   const startDateTime = new Date(date)
   startDateTime.setHours(hours || 0, minutes || 0, 0, 0)
@@ -58,7 +58,7 @@ export default function BookRoomModal({
   const endDateTime = addMinutes(startDateTime, durationMinutes)
   const endTimeStr = format(endDateTime, 'HH:mm')
 
-  // Форматирование даты для плашки с подтверждением
+  // форматирование даты для плашки с подтверждением
   const formattedDay = format(startDateTime, 'EEEE', { locale: ru })
   const capitalizedDay = formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1)
   const formattedDateStr = format(startDateTime, 'd MMMM', { locale: ru })
@@ -103,7 +103,7 @@ export default function BookRoomModal({
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {/* Тема встречи */}
+          {/* тема */}
           <div className="form-group">
             <label htmlFor="booking-title">
               Тема встречи <span className="required">*</span>
@@ -112,14 +112,14 @@ export default function BookRoomModal({
               id="booking-title"
               type="text"
               className="modal-input"
-              placeholder="Daily Sync: Разработка & Продукт"
+              placeholder="Ваша тема встречи..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
             />
           </div>
 
-          {/* Дата и Время начала */}
+          {/* дата и время начала */}
           <div className="form-row">
             <div className="form-group">
               <label>Дата</label>
@@ -129,7 +129,6 @@ export default function BookRoomModal({
                   type="text"
                   className="modal-input"
                   value={format(date, 'd MMMM, EEE', { locale: ru })}
-                  readOnly
                 />
               </div>
             </div>
@@ -143,13 +142,13 @@ export default function BookRoomModal({
                   className="modal-input"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  placeholder="15:00"
+                  placeholder="--:--"
                 />
               </div>
             </div>
           </div>
 
-          {/* Продолжительность */}
+          {/* продолжительность */}
           <div className="form-group">
             <label>Продолжительность</label>
             <div className="select-wrapper">
@@ -168,7 +167,7 @@ export default function BookRoomModal({
             </div>
           </div>
 
-          {/* Комментарий */}
+          {/* комментарий */}
           <div className="form-group">
             <label>Комментарий</label>
             <textarea
@@ -180,7 +179,7 @@ export default function BookRoomModal({
             />
           </div>
 
-          {/* Информационная плашка */}
+          {/* информационная плашка */}
           <div className="info-banner">
             <span className="info-icon">ⓘ</span>
             <span>
@@ -190,7 +189,7 @@ export default function BookRoomModal({
 
           {submitError && <div className="modal-error">{submitError}</div>}
 
-          {/* Кнопки */}
+          {/* кнопки */}
           <div className="modal-actions">
             <button
               type="button"

@@ -27,11 +27,13 @@ const CustomDateInput = forwardRef(({ value, onClick }, ref) => (
 interface RoomCalendarProps {
   roomId: string
   timezone: string
+  onBookClick: () => void
 }
 
 export default function RoomCalendar({
     roomId,
-    timezone
+    timezone,
+    onBookClick
 }: RoomCalendarProps) {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [bookings, setBookings] = useState<Booking[]>([])
@@ -254,7 +256,7 @@ export default function RoomCalendar({
         </div>
 
             <div className="calendar-footer">
-                <button className="book-btn">Забронировать комнату</button>
+                <button className="book-btn" onClick={onBookClick}>Забронировать комнату</button>
             </div>
         </div>
     );

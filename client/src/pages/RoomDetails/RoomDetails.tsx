@@ -7,6 +7,7 @@ import { getRoom } from '../../api/rooms'
 import Header from '../../components/Header'
 import RoomDetailsCard from '../../components/RoomDetailsCard'
 import RoomCalendar from '../../components/RoomCalendar'
+import BookRoomModal from '../../components/BookRoomModal'
 
 export default function RoomDetails() {
   const { roomId } = useParams()
@@ -14,6 +15,8 @@ export default function RoomDetails() {
   const [room, setRoom] = useState<Room | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false)
 
   const loadRoom = async () => {
     if (!roomId) {
@@ -61,41 +64,39 @@ export default function RoomDetails() {
       <Header />
 
       <div className="container">
-
         <nav className="breadcrumbs">
-          <Link to="/rooms">
-            Переговорные
-          </Link>
-
-          <span className="breadcrumb-separator">
-            &gt;
-          </span>
-
-          <Link to="/rooms">
-            {room.office.name}
-          </Link>
-
-          <span className="breadcrumb-separator">
-            &gt;
-          </span>
-
-          <span className="breadcrumb-current">
-            Комната '{room.name}'
-          </span>
+          <Link to="/rooms">Переговорные</Link>
+          <span className="breadcrumb-separator">&gt;</span>
+          <Link to="/rooms">{room.office.name}</Link>
+          <span className="breadcrumb-separator">&gt;</span>
+          <span className="breadcrumb-current">Комната '{room.name}'</span>
         </nav>
 
         <div className="room-details-wrapper">
-          <RoomDetailsCard room={room} />
+          <RoomDetailsCard 
+            room={room} 
+          />
 
           {room && (
             <RoomCalendar
               roomId={room.id}
               timezone={room.office.timezone}
+              onBookClick={() => setIsBookModalOpen(true)}
             />
           )}
         </div>
-
       </div>
+
+      {room && (
+        <BookRoomModal
+          isOpen={isBookModalOpen}
+          onClose={() => setIsBookModalOpen(false)}
+          room={room}
+          onSuccess={() => {
+            loadRoom()
+          }}
+        />
+      )}
     </div>
   )
 }
