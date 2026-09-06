@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef } from 'react'
 import { format, addMinutes } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import './BookRoomModal.css'
 import type { Room } from '../types/api'
 import calendarIcon from '../assets/calendar.svg'
 import clockIcon from '../assets/clock.svg'
+
+registerLocale('ru', ru)
 
 interface BookRoomModalProps {
   isOpen: boolean
@@ -24,16 +28,34 @@ const DURATION_OPTIONS = [
   { label: '2 часа', value: 120 },
 ]
 
+const CustomDateInput = forwardRef<
+  HTMLButtonElement,
+  { value?: string; onClick?: () => void }
+>(({ value, onClick }, ref) => (
+  <button
+    type="button"
+    className="modal-date-picker-button"
+    onClick={onClick}
+    ref={ref}
+  >
+    <img src={calendarIcon} alt="" />
+
+    <span>
+      {value}
+    </span>
+  </button>
+))
+
 export default function BookRoomModal({
   isOpen,
   onClose,
   room,
-  initialDate = new Date(),
+  initialDate,
   initialStartTime = '15:00',
   onSuccess,
 }: BookRoomModalProps) {
   const [title, setTitle] = useState('')
-  const [date, setDate] = useState<Date>(initialDate)
+  const [date, setDate] = useState<Date>(() => initialDate ?? new Date())
   const [startTime, setStartTime] = useState(initialStartTime)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [comment, setComment] = useState('')
@@ -42,11 +64,11 @@ export default function BookRoomModal({
 
   useEffect(() => {
     if (isOpen) {
-      setDate(initialDate)
-      setStartTime(initialStartTime)
-      setSubmitError(null)
+        setDate(initialDate ?? new Date())
+        setStartTime(initialStartTime)
+        setSubmitError(null)
     }
-  }, [isOpen, initialDate, initialStartTime])
+}, [isOpen, initialDate, initialStartTime])
 
   if (!isOpen) return null
 
@@ -122,29 +144,39 @@ export default function BookRoomModal({
           {/* дата и время начала */}
           <div className="form-row">
             <div className="form-group">
-              <label>Дата</label>
-              <div className="input-with-icon">
-                <img src={calendarIcon} alt="calendar" />
-                <input
-                  type="text"
-                  className="modal-input"
-                  value={format(date, 'd MMMM, EEE', { locale: ru })}
+                <label>Дата</label>
+
+                <DatePicker
+                    selected={date}
+                    onChange={(selectedDate) => {
+                    if (selectedDate) {
+                        setDate(selectedDate)
+                    }
+                    }}
+                    locale="ru"
+                    dateFormat="d MMMM, EEE"
+                    minDate={new Date()}
+                    customInput={<CustomDateInput />}
                 />
-              </div>
-            </div>
+                </div>
 
             <div className="form-group">
-              <label>Время начала</label>
-              <div className="input-with-icon">
-                <img src={clockIcon} alt="clock" />
-                <input
-                  type="text"
-                  className="modal-input"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  placeholder="--:--"
-                />
-              </div>
+                <label>Время начала</label>
+
+                <div className="input-with-icon">
+                    <img src={clockIcon} alt="" />
+
+                    <input
+                    type="time"
+                    className="modal-input"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    min="09:00"
+                    max="20:00"
+                    step="900"
+                    required
+                    />
+                </div>
             </div>
           </div>
 
