@@ -1,5 +1,9 @@
 input {
-    font-family: inherit;
+  font-family: inherit;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 .modal-overlay {
@@ -53,6 +57,7 @@ input {
 }
 
 .form-group {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -75,7 +80,6 @@ input {
 }
 
 .modal-input,
-.modal-select,
 .modal-textarea {
   width: 100%;
   padding: 10px 14px;
@@ -86,11 +90,10 @@ input {
   outline: none;
   background-color: #ffffff;
   box-sizing: border-box;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .modal-input:focus,
-.modal-select:focus,
 .modal-textarea:focus {
   border-color: #0d9488;
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
@@ -115,24 +118,105 @@ input {
   padding-left: 38px;
 }
 
-.select-wrapper {
-  position: relative;
-}
-
-.modal-select {
-  appearance: none;
-  cursor: pointer;
-  padding-right: 36px;
-}
-
-.select-chevron {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #64748b;
+/* Кастомный дропдаун продолжительности */
+.modal-select-field {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-select-field:hover {
+  border-color: #94a3b8;
+}
+
+.modal-select-field.active {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.chevron {
+  color: #475569;
+  font-size: 16px;
+  line-height: 1;
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg) translateY(1px);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-item {
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f172a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.dropdown-item:hover {
+  background: #f1f5f9;
+}
+
+.dropdown-item.selected {
+  background: #ccfaf1;
+  color: #0f766e;
+  font-weight: 500;
+}
+
+/* Неактивный вариант длительности */
+.dropdown-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: transparent !important;
+}
+
+.dropdown-item.disabled .duration-end-time {
+  color: #94a3b8;
+}
+
+.duration-end-time {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.checkmark {
+  color: #059669;
+  font-weight: bold;
 }
 
 .modal-textarea {
@@ -147,7 +231,7 @@ input {
   padding: 12px 14px;
   border-radius: 10px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -209,15 +293,28 @@ input {
 }
 
 .modal-date-picker-button {
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
-    font-family: inherit;
-    font-size: 14px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center; 
-    gap: 8px;
-    border-radius: 10px;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center; 
+  gap: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-date-picker-button:hover {
+  border-color: #94a3b8;
+}
+
+.modal-date-picker-button:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  outline: none;
 }
 
 @keyframes fadeIn {

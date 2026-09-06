@@ -1,12 +1,15 @@
-import React, { useState, useEffect, forwardRef } from 'react'
+import React, { useState, useEffect, useRef, forwardRef } from 'react'
 import { format, addMinutes } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { fromZonedTime } from 'date-fns-tz'
 import './BookRoomModal.css'
 import type { Room } from '../types/api'
 import calendarIcon from '../assets/calendar.svg'
 import clockIcon from '../assets/clock.svg'
+
+import { createBooking } from '../api/bookings'
 
 registerLocale('ru', ru)
 
@@ -24,7 +27,9 @@ const DURATION_OPTIONS = [
   { label: '30 минут', value: 30 },
   { label: '45 минут', value: 45 },
   { label: '1 час', value: 60 },
+  { label: '1 ч 15 мин', value: 75 },
   { label: '1 ч 30 мин', value: 90 },
+  { label: '1 ч 45 мин', value: 105 },
   { label: '2 часа', value: 120 },
 ]
 
@@ -39,12 +44,10 @@ const CustomDateInput = forwardRef<
     ref={ref}
   >
     <img src={calendarIcon} alt="" />
-
-    <span>
-      {value}
-    </span>
+    <span>{value}</span>
   </button>
 ))
+CustomDateInput.displayName = 'CustomDateInput'
 
 export default function BookRoomModal({
   isOpen,
@@ -59,59 +62,127 @@ export default function BookRoomModal({
   const [startTime, setStartTime] = useState(initialStartTime)
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [comment, setComment] = useState('')
+  
+  // Состояния для кастомного дропдауна
+  const [isDurationOpen, setIsDurationOpen] = useState(false)
+  const durationRef = useRef<HTMLDivElement>(null)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isOpen) {
-        setDate(initialDate ?? new Date())
-        setStartTime(initialStartTime)
-        setSubmitError(null)
-    }
-}, [isOpen, initialDate, initialStartTime])
-
-  if (!isOpen) return null
-
-  // расчет времени окончания
+  // Расчет времени и верхнего порога (20:00)
   const [hours, minutes] = startTime.split(':').map(Number)
   const startDateTime = new Date(date)
   startDateTime.setHours(hours || 0, minutes || 0, 0, 0)
-  
+
+  const maxEndDateTime = new Date(date)
+  maxEndDateTime.setHours(20, 0, 0, 0)
+
   const endDateTime = addMinutes(startDateTime, durationMinutes)
   const endTimeStr = format(endDateTime, 'HH:mm')
+  const isExceedingMaxTime = endDateTime > maxEndDateTime
+
+    const createOfficeDateTime = (
+        date: Date,
+        time: string,
+        timezone: string,
+        ) => {
+        const [hours, minutes] = time.split(':').map(Number)
+
+        const dateString = format(date, 'yyyy-MM-dd')
+
+        return fromZonedTime(
+            `${dateString} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`,
+            timezone,
+        )
+    }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        durationRef.current &&
+        !durationRef.current.contains(event.target as Node)
+      ) {
+        setIsDurationOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    if (isExceedingMaxTime) {
+      const validOptions = DURATION_OPTIONS.filter(
+        (opt) => addMinutes(startDateTime, opt.value) <= maxEndDateTime
+      )
+      if (validOptions.length > 0) {
+        setDurationMinutes(validOptions[validOptions.length - 1].value)
+      }
+    }
+  }, [startTime, date])
+
+  useEffect(() => {
+    if (isOpen) {
+      setDate(initialDate ?? new Date())
+      setStartTime(initialStartTime)
+      setSubmitError(null)
+      setIsDurationOpen(false)
+    }
+  }, [isOpen, initialDate, initialStartTime])
+
+  if (!isOpen) return null
 
   // форматирование даты для плашки с подтверждением
   const formattedDay = format(startDateTime, 'EEEE', { locale: ru })
-  const capitalizedDay = formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1)
+  const capitalizedDay =
+    formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1)
   const formattedDateStr = format(startDateTime, 'd MMMM', { locale: ru })
 
-  const durationLabel = DURATION_OPTIONS.find((opt) => opt.value === durationMinutes)?.label || `${durationMinutes} мин`
+  const currentDurationOpt =
+    DURATION_OPTIONS.find((opt) => opt.value === durationMinutes) || DURATION_OPTIONS[3]
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!title.trim()) return
+        e.preventDefault()
 
-    try {
-      setIsSubmitting(true)
-      setSubmitError(null)
+        if (!title.trim() || isExceedingMaxTime) return
 
-      // TODO: Вызов вашего API функции бронирования
-      // await createBooking({
-      //   roomId: room.id,
-      //   title,
-      //   from: startDateTime.toISOString(),
-      //   to: endDateTime.toISOString(),
-      //   comment,
-      // })
+        try {
+            setIsSubmitting(true)
+            setSubmitError(null)
 
-      onSuccess?.()
-      onClose()
-    } catch {
-      setSubmitError('Не удалось забронировать комнату. Попробуйте снова.')
-    } finally {
-      setIsSubmitting(false)
+            const officeTimezone = room.office.timezone
+
+            const startsAt = createOfficeDateTime(
+            date,
+            startTime,
+            officeTimezone,
+            )
+
+            const endsAt = addMinutes(
+            startsAt,
+            durationMinutes,
+            )
+
+            await createBooking({
+            roomId: room.id,
+            title: title.trim(),
+            comment: comment.trim() || null,
+            startsAt: startsAt.toISOString(),
+            endsAt: endsAt.toISOString(),
+            })
+
+            onSuccess?.()
+            onClose()
+        } catch (error) {
+            setSubmitError(
+            error instanceof Error
+                ? error.message
+                : 'Не удалось забронировать комнату. Попробуйте снова.',
+            )
+        } finally {
+            setIsSubmitting(false)
+        }
     }
-  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -144,59 +215,82 @@ export default function BookRoomModal({
           {/* дата и время начала */}
           <div className="form-row">
             <div className="form-group">
-                <label>Дата</label>
-
-                <DatePicker
-                    selected={date}
-                    onChange={(selectedDate) => {
-                    if (selectedDate) {
-                        setDate(selectedDate)
-                    }
-                    }}
-                    locale="ru"
-                    dateFormat="d MMMM, EEE"
-                    minDate={new Date()}
-                    customInput={<CustomDateInput />}
-                />
-                </div>
+              <label>Дата</label>
+              <DatePicker
+                selected={date}
+                onChange={(selectedDate) => {
+                  if (selectedDate) {
+                    setDate(selectedDate)
+                  }
+                }}
+                locale="ru"
+                dateFormat="d MMMM, EEE"
+                minDate={new Date()}
+                customInput={<CustomDateInput />}
+              />
+            </div>
 
             <div className="form-group">
-                <label>Время начала</label>
-
-                <div className="input-with-icon">
-                    <img src={clockIcon} alt="" />
-
-                    <input
-                    type="time"
-                    className="modal-input"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    min="09:00"
-                    max="20:00"
-                    step="900"
-                    required
-                    />
-                </div>
+              <label>Время начала</label>
+              <div className="input-with-icon">
+                <img src={clockIcon} alt="" />
+                <input
+                  type="time"
+                  className="modal-input"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  min="09:00"
+                  max="20:00"
+                  step="900"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          {/* продолжительность */}
-          <div className="form-group">
+          {/* кастомная продолжительность */}
+          <div className="form-group" ref={durationRef}>
             <label>Продолжительность</label>
-            <div className="select-wrapper">
-              <select
-                className="modal-select"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              >
-                {DURATION_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label} (до {format(addMinutes(startDateTime, opt.value), 'HH:mm')})
-                  </option>
-                ))}
-              </select>
-              <span className="select-chevron">⌄</span>
+            <div
+              className={`modal-select-field pointer ${isDurationOpen ? 'active' : ''}`}
+              onClick={() => setIsDurationOpen(!isDurationOpen)}
+            >
+              <span>
+                {currentDurationOpt.label} (до {endTimeStr})
+              </span>
+              <span className={`chevron ${isDurationOpen ? 'open' : ''}`}>⌄</span>
             </div>
+
+            {isDurationOpen && (
+              <div className="dropdown-menu">
+                {DURATION_OPTIONS.map((opt) => {
+                  const optEndTimeDate = addMinutes(startDateTime, opt.value)
+                  const isDisabled = optEndTimeDate > maxEndDateTime
+                  const optEndTime = format(optEndTimeDate, 'HH:mm')
+                  const isSelected = durationMinutes === opt.value
+
+                  return (
+                    <div
+                      key={opt.value}
+                      className={`dropdown-item ${isSelected ? 'selected' : ''} ${
+                        isDisabled ? 'disabled' : ''
+                      }`}
+                      onClick={() => {
+                        if (isDisabled) return
+                        setDurationMinutes(opt.value)
+                        setIsDurationOpen(false)
+                      }}
+                    >
+                      <span>
+                        {opt.label}{' '}
+                        <span className="duration-end-time">(до {optEndTime})</span>
+                      </span>
+                      {isSelected && !isDisabled && <span className="checkmark">✓</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* комментарий */}
@@ -215,7 +309,7 @@ export default function BookRoomModal({
           <div className="info-banner">
             <span className="info-icon">ⓘ</span>
             <span>
-              Бронирование на {capitalizedDay}, {formattedDateStr}, {startTime} - {endTimeStr} ({durationLabel})
+              Бронирование на {capitalizedDay}, {formattedDateStr}, {startTime} - {endTimeStr} ({currentDurationOpt.label})
             </span>
           </div>
 
@@ -234,7 +328,7 @@ export default function BookRoomModal({
             <button
               type="submit"
               className="btn-primary"
-              disabled={isSubmitting || !title.trim()}
+              disabled={isSubmitting || !title.trim() || isExceedingMaxTime}
             >
               {isSubmitting ? 'Бронирование...' : 'Забронировать'}
             </button>

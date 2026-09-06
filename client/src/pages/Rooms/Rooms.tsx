@@ -335,7 +335,7 @@ export default function Rooms() {
               <div className="date-selector-field">
                 <img src={clock} alt="clock" />
                 <input 
-                  type="text" 
+                  type="time" 
                   placeholder="--:--" 
                   className="time-input" 
                   value={startTime}

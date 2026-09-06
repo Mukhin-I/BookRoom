@@ -51,6 +51,10 @@ body {
   font-family: "Manrope", sans-serif;
 }
 
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
 h1,
 h2,
 h3,

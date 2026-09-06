@@ -17,6 +17,7 @@ export default function RoomDetails() {
   const [isLoading, setIsLoading] = useState(true)
 
   const [isBookModalOpen, setIsBookModalOpen] = useState(false)
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
 
   const loadRoom = async () => {
     if (!roomId) {
@@ -79,6 +80,7 @@ export default function RoomDetails() {
 
           {room && (
             <RoomCalendar
+              key={calendarRefreshKey}
               roomId={room.id}
               timezone={room.office.timezone}
               onBookClick={() => setIsBookModalOpen(true)}
@@ -93,7 +95,7 @@ export default function RoomDetails() {
           onClose={() => setIsBookModalOpen(false)}
           room={room}
           onSuccess={() => {
-            loadRoom()
+            setCalendarRefreshKey((prev) => prev + 1)
           }}
         />
       )}
