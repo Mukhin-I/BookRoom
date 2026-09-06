@@ -1,0 +1,85 @@
+.my-bookings {
+    padding: 40px 40px 100vh 40px;
+    background: #F8FAFC;
+}
+
+.bookings-sec-title {
+    font-weight: 800;
+    font-size: 28px;
+    color: #0F172A;
+}
+
+.bookings-office-selector h2 {
+    font-weight: 400;
+    font-size: 14px;
+    color: #0F172A;
+    font-family: inherit;
+}
+
+.bookings-office-selector .office-chevron {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.bookings-office-selector, .bookings-calendar {
+    border: 1px solid #E2E8F0;
+    background: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.bookings-office-selector p {
+    font-weight: 400;
+    font-size: 14px;
+
+}
+
+.bookings-calendar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bookings-header-btns {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bookings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.book-tabs li {
+    padding-bottom: 12px;
+    width: fit-content;
+}
+
+.book-tabs li:not(.selected) {
+    font-weight: 500;
+    font-size: 16px;
+    color: #475569;
+}
+
+.book-tabs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-left: 0;
+}
+
+.bookings-tabs {
+    margin-top: 32px;
+    border-bottom: 1px solid #E2E8F0;
+}
+.bookings-list {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 16px;
+}
+

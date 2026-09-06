@@ -1,0 +1,104 @@
+.booking-card {
+    width: -webkit-fill-available;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.booking-date-badge {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    background: #F8FAFC;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+.booking-month {
+    font-weight: 700;
+    font-size: 12px;
+    color: #94A3B8;
+}
+
+.booking-day {
+    font-weight: 800;
+    font-size: 24px;
+    color: #0F172A;
+}
+
+.booking-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0F172A;
+    width: -webkit-fill-available;
+}
+
+.booking-office-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0D9488;
+}
+
+.booking-office {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.booking-bottom-sep {
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: #94A3B8;
+    border-radius: 1000px;
+}
+
+.booking-bottom-rest {
+    font-weight: 400;
+    font-size: 14px;
+    color: #475569;
+}
+
+.booking-bottom-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.booking-card-info {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.booking-card-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.cancel-booking {
+    display: block;
+    cursor: pointer;
+    border: 1px solid #EF4444;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    color: #EF4444;
+    background: #fff;
+    transition: background 0.3s ease;
+
+    &:hover {
+        background: #EF4444;
+        color: #fff;
+    }
+}

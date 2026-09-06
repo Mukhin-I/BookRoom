@@ -406,19 +406,19 @@ export default function Rooms() {
         
               {/* карточки переговорок */}
           <section className="available-rooms">
-            {selectedOffice && !error && (
+            { selectedOffice && !error && (
               <h1 className="av-rooms-title">
                 {isLoadingRooms ? 'Загрузка переговорных...' : 'Доступные переговорные в этом офисе'}
               </h1>
             )}
             <div className="rooms">
-                {isLoadingRooms && (
+                {(isLoadingRooms || isLoadingOffices) && (
                   [...Array(4)].map((_, index) => (
                     <RoomCardSkeleton key={index} />
                   ))
                 )}
 
-                {!selectedOffice && (
+                {!error && !selectedOffice && (
                   <>
                     <div className="error-banner">
                       <div className="alert-triangle no-office">

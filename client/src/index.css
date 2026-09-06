@@ -55,6 +55,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
 }
 
+a {
+  text-decoration: none;
+}
+
+ul {
+  margin: 0;
+}
+
+li {
+  list-style: none;
+}
+
 h1,
 h2,
 h3,

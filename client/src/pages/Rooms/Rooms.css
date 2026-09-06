@@ -133,7 +133,7 @@
     color: #0F172A;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start !important;
     transition: background 0.2s;
 }
 
