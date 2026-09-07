@@ -139,3 +139,182 @@
     background: #FEE2E2;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 41, 59, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.cancel-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.modal-booking-info {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 32px;
+}
+
+.modal-booking-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.modal-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.modal-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.modal-info-row img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn-cancel,
+.modal-btn-confirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn-cancel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.modal-btn-cancel:hover {
+  background: #f1f5f9;
+}
+
+.modal-btn-confirm {
+  background: #ef4444;
+  border: 1px solid #ef4444;
+  color: #ffffff;
+}
+
+.modal-btn-confirm:hover {
+  background: #dc2626;
+}
+
+@keyframes pulse-bg {
+  0% { background-color: #f1f5f9; }
+  50% { background-color: #e2e8f0; }
+  100% { background-color: #f1f5f9; }
+}
+
+.skeleton {
+  animation: pulse-bg 1.5s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+.skeleton-page-title {
+  width: 240px;
+  height: 32px;
+}
+
+.skeleton-header-btn {
+  width: 180px;
+  height: 44px;
+}
+
+.skeleton-tabs-bar {
+  width: 220px;
+  height: 24px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.skeleton-card-wrapper {
+  pointer-events: none;
+  border: 1px solid #f1f5f9;
+}
+
+.skeleton-badge-bg {
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.skeleton-badge-month {
+  width: 32px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.skeleton-badge-day {
+  width: 24px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.skeleton-title-line {
+  width: 280px;
+  height: 20px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.skeleton-info-segment {
+  width: 70px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-cancel-btn {
+  width: 90px;
+  height: 36px;
+}
+

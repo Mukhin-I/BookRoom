@@ -68,3 +68,18 @@ export async function getBookings(
 
   return data.items
 }
+
+export async function cancelBooking(
+  bookingId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/bookings/${bookingId}`,
+    {
+      method: 'DELETE',
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error('Не удалось отменить бронирование')
+  }
+}

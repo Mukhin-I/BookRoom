@@ -15,6 +15,30 @@ import alert from '../../assets/alert-triangle.svg'
 import BookingCard from '../../components/BookingCard'
 import { Book } from 'lucide-react';
 
+const BookingCardSkeleton = () => (
+  <div className="booking-card skeleton-card-wrapper">
+    <div className="booking-card-left">
+      <div className="booking-date-badge skeleton-badge-bg">
+        <div className="skeleton skeleton-badge-month"></div>
+        <div className="skeleton skeleton-badge-day"></div>
+      </div>
+      
+      <div className="booking-card-info">
+        <div className="skeleton skeleton-title-line"></div>
+        
+        <div className="booking-bottom-info">
+          <div className="skeleton skeleton-info-segment"></div>
+          <span className="booking-bottom-sep" />
+          <div className="skeleton skeleton-info-segment"></div>
+          <span className="booking-bottom-sep" />
+          <div className="skeleton skeleton-info-segment" style={{ width: '90px' }}></div>
+        </div>
+      </div>
+    </div>
+    <div className="skeleton skeleton-cancel-btn"></div>
+  </div>
+);
+
 export default function Bookings() {
     const [offices, setOffices] = useState<Office[]>([])
     const [selectedOffice, setSelectedOffice] = useState<Office | null>(null)
@@ -179,8 +203,11 @@ export default function Bookings() {
             </ul>
           </div>
           <div className="bookings-list">
-            {isLoadingBookings && (
-              <p>Загрузка бронирований...</p>
+            {(isLoadingBookings || isLoadingOffices) && (
+              <>
+                 <BookingCardSkeleton />
+                 <BookingCardSkeleton />
+               </>
             )}
 
             {bookingError && (
@@ -226,6 +253,7 @@ export default function Bookings() {
                 <BookingCard
                   key={booking.id}
                   booking={booking}
+                  onCancelled={loadBookings}
                 />
               ))}
           </div>
