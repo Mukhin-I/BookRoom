@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import './Header.css'
 import logo from '../assets/logo-badge.svg'
 
+import { useCurrentUser } from '../context/CurrentUserContext'
+
 export type TabType = 'rooms' | 'bookings'
 
 interface HeaderProps {
@@ -10,20 +12,11 @@ interface HeaderProps {
   onTabChange?: (tab: TabType) => void
 }
 
-function getInitials(username: string): string {
-  return username
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-}
-
 export default function Header({
   initialSelected = 'rooms',
   onTabChange,
 }: HeaderProps) {
-  const username = 'Константин К.'
+  const { currentUser, isLoadingUser } = useCurrentUser()
   const [selected, setSelected] = useState<TabType>(initialSelected)
 
   const handleSelect = (tab: TabType) => {
@@ -63,8 +56,26 @@ export default function Header({
           </ul>
 
           <div className="user-profile">
-            <h4 className="username">{username}</h4>
-            <div className="avatar">{getInitials(username)}</div>
+              {isLoadingUser ? (
+                <>
+                  <div className="skeleton skeleton-username" />
+                  <div className="skeleton skeleton-avatar" />
+                </>
+              ) : currentUser ? (
+                <>
+                  <h4 className="username">
+                    {currentUser.displayName}
+                  </h4>
+
+                  <div className="avatar">
+                    {currentUser.initials}
+                  </div>
+                </>
+              ) : (
+                <h4 className="username">
+                  Пользователь
+                </h4>
+              )}
           </div>
         </div>
       </div>

@@ -13,7 +13,15 @@ import calIcon from '../../assets/cal-icon.svg'
 import alert from '../../assets/alert-triangle.svg'
 
 import BookingCard from '../../components/BookingCard'
-import { Book } from 'lucide-react';
+import PageTitle from '../../components/PageTitle'
+
+import DatePicker from 'react-datepicker'
+import { registerLocale } from 'react-datepicker'
+import { ru } from 'date-fns/locale'
+import 'react-datepicker/dist/react-datepicker.css'
+import { format } from 'date-fns'
+
+registerLocale('ru', ru)
 
 const BookingCardSkeleton = () => (
   <div className="booking-card skeleton-card-wrapper">
@@ -55,27 +63,39 @@ export default function Bookings() {
     const [bookingError, setBookingError] = useState<string | null>(null)
 
     const [activeScope, setActiveScope] = useState<'upcoming' | 'past'>(
-  'upcoming',
-)
+      'upcoming',
+    )
+
+    const [startDate, setStartDate] = useState<Date | null>(null)
+    const [endDate, setEndDate] = useState<Date | null>(null)
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    const calendarRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-          const target = event.target as Node
-    
-          if (
-            officeRef.current &&
-            !officeRef.current.contains(target)
-          ) {
-            setIsOfficeOpen(false)
-          }
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as Node
+
+        if (
+          officeRef.current &&
+          !officeRef.current.contains(target)
+        ) {
+          setIsOfficeOpen(false)
         }
-    
-        document.addEventListener('mousedown', handleClickOutside)
-    
-        return () => {
-          document.removeEventListener('mousedown', handleClickOutside)
+
+        if (
+          calendarRef.current &&
+          !calendarRef.current.contains(target)
+        ) {
+          setIsCalendarOpen(false)
         }
-      }, [])
+      }
+
+      document.addEventListener('mousedown', handleClickOutside)
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [])
 
     const loadOffices = async () => {
       try {
@@ -125,8 +145,26 @@ export default function Bookings() {
       loadBookings()
     }, [selectedOffice, activeScope])
 
+    const filteredBookings = bookings.filter((booking) => {
+      if (!startDate || !endDate) {
+        return true
+      }
+
+      const bookingStart = new Date(booking.startsAt)
+
+      const normalizedEndDate = new Date(endDate)
+      normalizedEndDate.setHours(23, 59, 59, 999)
+
+      return (
+        bookingStart >= startDate &&
+        bookingStart <= normalizedEndDate
+      )
+    })
+
   return(
     <>
+      <PageTitle title="Мои бронирования" />
+
       <Header initialSelected='bookings' />
       <section className="my-bookings">
         <div className="container">
@@ -176,9 +214,63 @@ export default function Bookings() {
                 )}
               </div>
 
-              <div className="bookings-calendar">
-                    <img src={calendar} alt="calendar" />
-                    <p>За все время</p>
+              <div
+                className="bookings-calendar-wrapper"
+                ref={calendarRef}
+              >
+                <button
+                  type="button"
+                  className="bookings-calendar"
+                  onClick={() => setIsCalendarOpen((prev) => !prev)}
+                >
+                  <img src={calendar} alt="" />
+
+                  <p>
+                    {startDate && endDate
+                      ? `${format(startDate, 'd MMMM yyyy', { locale: ru })} — ${format(
+                          endDate,
+                          'd MMMM yyyy',
+                          { locale: ru },
+                        )}`
+                      : 'За все время'}
+                  </p>
+                </button>
+
+                {isCalendarOpen && (
+                  <div className="bookings-calendar-dropdown">
+                    <DatePicker
+                      selectsRange
+                      startDate={startDate}
+                      endDate={endDate}
+                      onChange={(dates) => {
+                        const [start, end] = dates
+
+                        setStartDate(start)
+                        setEndDate(end)
+
+                        if (start && end) {
+                          setIsCalendarOpen(false)
+                        }
+                      }}
+                      inline
+                      locale="ru"
+                    />
+
+                    {(startDate || endDate) && (
+                      <button
+                        type="button"
+                        className="clear-period-button"
+                        onClick={() => {
+                          setStartDate(null)
+                          setEndDate(null)
+                          setIsCalendarOpen(false)
+                        }}
+                      >
+                        Сбросить период
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -191,7 +283,7 @@ export default function Bookings() {
                 onClick={() => setActiveScope('upcoming')}
               >
                 Предстоящие
-                {activeScope === 'upcoming' && ` (${bookings.length})`}
+                {activeScope === 'upcoming' && ` (${filteredBookings.length})`}
               </li>
 
               <li
@@ -227,7 +319,7 @@ export default function Bookings() {
 
             {!isLoadingBookings &&
               !bookingError &&
-              bookings.length === 0 && (
+              filteredBookings.length === 0 && (
                 <div className="bookings-error-banner">
                   <div className="bookings-error-icon">
                       <img src={calIcon} alt="calendar" />
@@ -249,7 +341,7 @@ export default function Bookings() {
 
             {!isLoadingBookings &&
               !bookingError &&
-              bookings.map((booking) => (
+              filteredBookings.map((booking) => (
                 <BookingCard
                   key={booking.id}
                   booking={booking}

@@ -95,11 +95,12 @@
 
 .room-buttons p {
     display: block;
-    width: 192.67px;
+    width: 193px;
     padding: 10px 57.33px;
     border-radius: 8px;
     font-weight: 600;
     font-size: 14px;
+    text-align: center;
 }
 
 .goto-room-details {
@@ -119,12 +120,26 @@
     background-color: rgba(13, 148, 136, 0.1)
 }
 
-.book-unavailable {
+.book-room.book-unavailable {
+    cursor: not-allowed;
     background: #E2E8F0;
     color: #94A3B8;
 }
 
-.book-available {
-    background: #0D9488;
+.book-room {
+    padding: 10px 16px;
+    display: block;
+    width: 193px;
+    text-align: center;
+    border-radius: 8px;
+    transition: 0.6s ease;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
     color: #fff;
+    background: #0D9488;
+
+    &:hover {
+        background: #0f6861;
+    }
 }

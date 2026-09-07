@@ -9,6 +9,7 @@ import RoomDetailsCard from '../../components/RoomDetailsCard'
 import RoomCalendar from '../../components/RoomCalendar'
 import BookRoomModal from '../../components/BookRoomModal'
 import ToastNotification from '../../components/ToastNotification'
+import PageTitle from '../../components/PageTitle'
 
 export default function RoomDetails() {
   const { roomId } = useParams()
@@ -45,75 +46,79 @@ export default function RoomDetails() {
     loadRoom()
   }, [roomId])
 
-  if (isLoading) {
+  if (error && !room) {
     return (
       <div className="container">
         <Header />
-        <p>Загрузка переговорной...</p>
+        <p>{error}</p>
       </div>
     )
   }
 
-  if (error || !room) {
-    return (
-      <div className="container">
-        <Header />
-        <p>{error ?? 'Переговорная не найдена'}</p>
-      </div>
-    )
-  }
 
   return (
-    <div className="container">
-      <Header />
-
-      {toast && (
-        <ToastNotification
-          title={toast.title}
-          message={toast.message}
-          onClose={() => setToast(null)}
-        />
-      )}
+    <>
+      <PageTitle
+        title={room ? room.name : 'Переговорная'}
+      />
 
       <div className="container">
-        <nav className="breadcrumbs">
-          <Link to="/rooms">Переговорные</Link>
-          <span className="breadcrumb-separator">&gt;</span>
-          <Link to="/rooms">{room.office.name}</Link>
-          <span className="breadcrumb-separator">&gt;</span>
-          <span className="breadcrumb-current">Комната '{room.name}'</span>
-        </nav>
+        <Header />
 
-        <div className="room-details-wrapper">
-          <RoomDetailsCard 
-            room={room} 
+        {toast && (
+          <ToastNotification
+            title={toast.title}
+            message={toast.message}
+            onClose={() => setToast(null)}
           />
+        )}
 
-          {room && (
+        <div className="container">
+          <nav className="breadcrumbs">
+            {isLoading ? (
+              <div className="skeleton" style={{ width: '220px', height: '18px', borderRadius: '4px' }} />
+            ) : (
+              <>
+                <Link to="/rooms">Переговорные</Link>
+                <span className="breadcrumb-separator">&gt;</span>
+                <Link to={`/rooms?officeId=${room?.office.id}`}>{room?.office.name}</Link>
+                <span className="breadcrumb-separator">&gt;</span>
+                <span className="breadcrumb-current">Комната '{room?.name}'</span>
+              </>
+            )}
+          </nav>
+
+          <div className="room-details-wrapper">
+            <RoomDetailsCard 
+              room={room}
+              isLoading={isLoading}
+            />
+
             <RoomCalendar
               key={calendarRefreshKey}
-              roomId={room.id}
-              timezone={room.office.timezone}
+              roomId={roomId}
+              timezone={room?.office.timezone ?? 'Europe/Moscow'}
               onBookClick={() => setIsBookModalOpen(true)}
+              isLoadingRoom={isLoading}
             />
-          )}
+          </div>
         </div>
-      </div>
 
-      {room && (
-        <BookRoomModal
-          isOpen={isBookModalOpen}
-          onClose={() => setIsBookModalOpen(false)}
-          room={room}
-          onSuccess={({ roomName, dateStr, timeRangeStr }) => {
-            setCalendarRefreshKey((prev) => prev + 1)
-            setToast({
-              title: 'Бронирование создано',
-              message: `Комната ${roomName}, ${dateStr}, ${timeRangeStr}`,
-            })
-          }}
-        />
-      )}
-    </div>
+        {room && (
+          <BookRoomModal
+            isOpen={isBookModalOpen}
+            onClose={() => setIsBookModalOpen(false)}
+            room={room}
+            onSuccess={({ roomName, dateStr, timeRangeStr }) => {
+              setCalendarRefreshKey((prev) => prev + 1)
+              setToast({
+                title: 'Бронирование создано',
+                message: `Комната ${roomName}, ${dateStr}, ${timeRangeStr}`,
+              })
+            }}
+          />
+        )}
+      </div>
+    </>
   )
 }

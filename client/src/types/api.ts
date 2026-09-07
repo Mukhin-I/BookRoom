@@ -1,3 +1,12 @@
+export interface User {
+  id: string
+  login: string
+  displayName: string
+  email: string
+  avatarUrl: string | null
+  initials: string
+}
+
 export interface Office {
   id: string
   name: string
@@ -42,12 +51,5 @@ export interface Booking {
 
   office: Office
 
-  owner: {
-    id: string
-    login: string
-    displayName: string
-    email: string
-    avatarUrl: string | null
-    initials: string
-  }
+  owner: User
 }

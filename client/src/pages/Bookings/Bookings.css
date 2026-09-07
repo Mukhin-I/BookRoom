@@ -318,3 +318,19 @@
   height: 36px;
 }
 
+.bookings-calendar-dropdown {
+    position: absolute;
+    left: 82%;
+}
+
+.clear-period-button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background 0.3s ease;
+
+    &:hover {
+        background: #c3c3c3;
+    }
+}

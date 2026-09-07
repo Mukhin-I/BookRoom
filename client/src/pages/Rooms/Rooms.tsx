@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import './Rooms.css';
 import Header from '../../components/Header';
-import calendarIcon from '../../assets/calendar.svg'; // Переименовал, чтобы не было конфликтов
+import calendarIcon from '../../assets/calendar.svg';
 import users from '../../assets/users.svg';
 import clock from '../../assets/clock.svg';
 import alert from '../../assets/alert-triangle.svg';
@@ -9,6 +9,8 @@ import searchX from '../../assets/search-x.svg';
 import building from '../../assets/building.svg';
 import RoomCard from '../../components/RoomCard';
 import RoomCardSkeleton from '../../components/RoomCardSkeleton';
+import ToastNotification from '../../components/ToastNotification'
+import PageTitle from '../../components/PageTitle'
 
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -18,6 +20,8 @@ import { addDays, format } from 'date-fns';
 import type { Office, Room } from '../../types/api'
 import { getOffices } from '../../api/offices'
 import { getRooms } from '../../api/rooms'
+
+import { useSearchParams } from 'react-router-dom'
 
 registerLocale('ru', ru);
 
@@ -46,6 +50,14 @@ export default function Rooms() {
 
   const [isOfficeOpen, setIsOfficeOpen] = useState(false)
   const officeRef = useRef<HTMLDivElement>(null)
+
+  const [toast, setToast] = useState<{
+    title: string
+    message: string
+  } | null>(null)
+
+  const [searchParams] = useSearchParams()
+  const officeIdFromUrl = searchParams.get('officeId')
 
   const validateDuration = (startTime: string, durationStr: string): boolean => {
     if (!startTime || !startTime.includes(':') || startTime.length < 5) return true;
@@ -133,6 +145,17 @@ export default function Rooms() {
         const data = await getOffices()
 
         setOffices(data)
+        
+        if (officeIdFromUrl) {
+          const office = data.find(
+            (office) => office.id === officeIdFromUrl,
+          )
+
+          if (office) {
+            setSelectedOffice(office)
+          }
+        }
+        
       } catch {
         setError('Не удалось загрузить офисы')
       } finally {
@@ -229,10 +252,21 @@ export default function Rooms() {
     return Number.parseInt(capacity, 10)
   }
 
+
   return (
     <>
+      <PageTitle title="Переговорные" />
+
       <div className="container">
         <Header />
+
+        {toast && (
+          <ToastNotification
+            title={toast.title}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
+        )}
         <div className="container">
           <div className="office-area-wrapper">
             <div className="office-selector" ref={officeRef}>
@@ -460,8 +494,16 @@ export default function Rooms() {
                     !error &&
                     rooms.map((room) => (
                     <RoomCard
-                        key={room.id}
-                        room={room}
+                      key={room.id}
+                      room={room}
+                      onBookingSuccess={({ roomName, dateStr, timeRangeStr }) => {
+                        loadRooms()
+
+                        setToast({
+                          title: 'Бронирование создано',
+                          message: `Комната ${roomName}, ${dateStr}, ${timeRangeStr}`,
+                        })
+                      }}
                     />
                     ))}
             </div>
