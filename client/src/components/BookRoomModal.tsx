@@ -9,7 +9,10 @@ import type { Room } from '../types/api'
 import calendarIcon from '../assets/calendar.svg'
 import clockIcon from '../assets/clock.svg'
 
-import { createBooking } from '../api/bookings'
+import {
+  createBooking,
+  BookingConflictError,
+} from '../api/bookings'
 
 registerLocale('ru', ru)
 
@@ -180,11 +183,17 @@ export default function BookRoomModal({
       })
       onClose()
     } catch (error) {
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось забронировать комнату. Попробуйте снова.',
-      )
+      if (error instanceof BookingConflictError) {
+        setSubmitError(
+          'Эта переговорная уже была забронирована другим пользователем. Выберите другое время.',
+        )
+      } else {
+        setSubmitError(
+          error instanceof Error
+            ? error.message
+            : 'Не удалось забронировать комнату. Попробуйте снова.',
+        )
+      }
     } finally {
       setIsSubmitting(false)
     }

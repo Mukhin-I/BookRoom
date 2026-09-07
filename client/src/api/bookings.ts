@@ -21,6 +21,13 @@ interface GetBookingsParams {
   officeId?: string
 }
 
+export class BookingConflictError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'BookingConflictError'
+  }
+}
+
 export async function createBooking(
   booking: CreateBookingData,
 ): Promise<Booking> {
@@ -34,9 +41,17 @@ export async function createBooking(
 
   const data = await response.json()
 
+  if (response.status === 409) {
+    throw new BookingConflictError(
+      data?.error?.message ??
+        'Эта переговорная уже забронирована на выбранное время',
+    )
+  }
+
   if (!response.ok) {
     throw new Error(
-      data?.error?.message ?? 'Не удалось создать бронирование',
+      data?.error?.message ??
+        'Не удалось создать бронирование',
     )
   }
 
