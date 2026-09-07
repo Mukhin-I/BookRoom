@@ -10,6 +10,17 @@ interface CreateBookingData {
   endsAt: string
 }
 
+interface BookingsResponse {
+  items: Booking[]
+}
+
+type BookingScope = 'upcoming' | 'past' | 'all'
+
+interface GetBookingsParams {
+  scope?: BookingScope
+  officeId?: string
+}
+
 export async function createBooking(
   booking: CreateBookingData,
 ): Promise<Booking> {
@@ -30,4 +41,30 @@ export async function createBooking(
   }
 
   return data
+}
+
+export async function getBookings(
+  params: GetBookingsParams = {},
+): Promise<Booking[]> {
+  const searchParams = new URLSearchParams()
+
+  if (params.scope) {
+    searchParams.set('scope', params.scope)
+  }
+
+  if (params.officeId) {
+    searchParams.set('officeId', params.officeId)
+  }
+
+  const response = await fetch(
+    `${API_URL}/bookings?${searchParams.toString()}`,
+  )
+
+  if (!response.ok) {
+    throw new Error('Не удалось загрузить бронирования')
+  }
+
+  const data: BookingsResponse = await response.json()
+
+  return data.items
 }

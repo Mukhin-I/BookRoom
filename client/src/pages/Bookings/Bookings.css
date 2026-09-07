@@ -56,6 +56,7 @@
 .book-tabs li {
     padding-bottom: 12px;
     width: fit-content;
+    cursor: pointer;
 }
 
 .book-tabs li:not(.selected) {
@@ -81,5 +82,60 @@
     align-items: center;
     flex-direction: column;
     gap: 16px;
+}
+
+.office-dropdown-itemselected {
+    flex-direction: column;
+}
+
+.bookings-error-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bookings-error-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 1000px;
+    background: #CCFBF1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bookings-error-title {
+    font-weight: 600;
+    font-size: 22px;
+    color: #212121;
+}
+
+.bookings-error-desc {
+    text-align: center;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 150%;
+    color: #808080;
+}
+
+.backto-rooms {
+    display: block;
+    background: #0D9488;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.3s ease;
+
+    &:hover {
+        background: #107068;
+    }
+}
+
+.alert-icon {
+    background: #FEE2E2;
 }
 
