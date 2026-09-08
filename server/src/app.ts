@@ -99,6 +99,14 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
 
   await app.register(cors, {
     origin: config.corsOrigins,
+    methods: [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+    ],
   });
   if (config.environment !== 'production') {
     const [{ default: swagger }, { default: swaggerUi }] = await Promise.all([
