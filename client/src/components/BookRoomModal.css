@@ -409,3 +409,19 @@ input {
 .conflict-modal-btn:active {
   background-color: #115e59;
 }
+
+h2.react-datepicker__current-month {
+  padding: 15px;
+}
+
+.react-datepicker__navigation--next {
+  margin-top: 10px;
+}
+
+.react-datepicker__navigation--next {
+  margin-top: 10px;
+}
+
+.react-datepicker {
+  background: #fff !important;
+}

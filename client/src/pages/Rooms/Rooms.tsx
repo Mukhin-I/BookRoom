@@ -371,6 +371,17 @@ export default function Rooms() {
                 minDate={new Date()} 
                 maxDate={addDays(new Date(), 30)}
                 customInput={<CustomDateInput />}
+                
+                calendarContainer={({ children }) => (
+                  <div className="custom-datepicker-wrapper">
+                    <div className="custom-datepicker-box">{children}</div>
+                    <div className="calendar-footer-text">
+                      Ограничение: не более 30 дней вперёд.<br/>
+                      Даты за пределами лимита неактивны.
+                    </div>
+                  </div>
+                )}
+                
                 renderCustomHeader={({
                   date,
                   decreaseMonth,
@@ -392,12 +403,7 @@ export default function Rooms() {
                     </div>
                   </div>
                 )}
-              >
-                {/* Текст под календарем */}
-                <div className="calendar-footer-text">
-                  Ограничение: не более 30 дней вперёд.
-                </div>
-              </DatePicker>
+              />
             </div>
                 
                 {/* начало брони */}

@@ -269,3 +269,124 @@
     background: #CCFBF1;
 }
 
+/* Убираем дефолтные стили библиотеки */
+.react-datepicker {
+  border: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+.react-datepicker__header {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 !important;
+}
+
+/* Наш кастомный белый блок с тенью */
+.custom-datepicker-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 12px;
+  position: absolute;
+}
+
+/* Текст под календарем */
+.calendar-footer-text {
+  color: #94A3B8;
+  font-size: 13px;
+  line-height: 1.5;
+  padding-left: 8px;
+}
+
+/* Шапка с месяцем и стрелками */
+.custom-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.calendar-month-year {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0F172A;
+  text-transform: capitalize; /* делает "октябрь" -> "Октябрь" */
+}
+
+.calendar-arrows {
+  display: flex;
+  gap: 6px;
+}
+
+.calendar-arrows button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #F8FAFC;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.calendar-arrows button:hover:not(:disabled) {
+  background: #E2E8F0;
+}
+
+.calendar-arrows button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Дни недели (Пн, Вт...) */
+.react-datepicker__day-names {
+  margin-bottom: 8px;
+}
+
+.react-datepicker__day-name {
+  color: #94A3B8 !important;
+  font-weight: 500;
+  width: 36px !important;
+  line-height: 36px !important;
+  margin: 2px !important;
+  text-transform: capitalize;
+}
+
+/* Числа месяца */
+.react-datepicker__day {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  margin: 2px !important;
+  font-weight: 500;
+  color: #0F172A;
+  border-radius: 8px !important;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.react-datepicker__day:hover:not(.react-datepicker__day--disabled) {
+  background: #F1F5F9 !important;
+}
+
+/* Выбранный день (берем фирменный бирюзовый с макета) */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #1C9A86 !important; 
+  color: #FFFFFF !important;
+}
+
+/* Неактивные дни и дни другого месяца */
+.react-datepicker__day--disabled,
+.react-datepicker__day--outside-month {
+  color: #CBD5E1 !important;
+}
+
