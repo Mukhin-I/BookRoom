@@ -19,7 +19,7 @@ describe('getDurationMinutes', () => {
     ['1 ч 45 мин', 105],
     ['2 часа', 120],
   ])(
-    'returns %i minutes for "%s"',
+    'возвращает %i минут для "%s"',
     (duration, expected) => {
       expect(getDurationMinutes(duration)).toBe(expected)
     },
@@ -34,7 +34,7 @@ describe('isValidBookingTime', () => {
     '09:15',
     '12:30',
     '19:45',
-  ])('accepts valid time %s', (time) => {
+  ])('принимает правильный формат %s', (time) => {
     expect(isValidBookingTime(time)).toBe(true)
   })
 
@@ -42,7 +42,7 @@ describe('isValidBookingTime', () => {
     '08:45',
     '20:00',
     '21:00',
-  ])('rejects time outside working hours: %s', (time) => {
+  ])('игнорирует время вне рабочего дня: %s', (time) => {
     expect(isValidBookingTime(time)).toBe(false)
   })
 
@@ -50,7 +50,7 @@ describe('isValidBookingTime', () => {
     '09:10',
     '12:22',
     '18:59',
-  ])('rejects time that is not divisible into 15-minute intervals: %s', (time) => {
+  ])('игнорирует время вне 15-минутного интервала: %s', (time) => {
     expect(isValidBookingTime(time)).toBe(false)
   })
 
@@ -59,32 +59,32 @@ describe('isValidBookingTime', () => {
     'hello',
     '8:00',
     '25:00',
-  ])('rejects invalid time format: %s', (time) => {
+  ])('игнорирует неправильный формат времени: %s', (time) => {
     expect(isValidBookingTime(time)).toBe(false)
   })
 })
 
 // тест на корректность доступного временного интервала бронирования
 describe('isBookingWithinWorkingHours', () => {
-  it('allows a booking that ends exactly at 20:00', () => {
+  it('возможность брони ровно в 20:00', () => {
     expect(
       isBookingWithinWorkingHours('19:00', 60),
     ).toBe(true)
   })
 
-  it('allows a booking inside working hours', () => {
+  it('возможность брони в рабочие часы', () => {
     expect(
       isBookingWithinWorkingHours('15:00', 60),
     ).toBe(true)
   })
 
-  it('rejects a booking that ends after 20:00', () => {
+  it('запрет на бронь после 20:00', () => {
     expect(
       isBookingWithinWorkingHours('19:30', 60),
     ).toBe(false)
   })
 
-  it('rejects a booking before 09:00', () => {
+  it('запрет на бронь до 09:00', () => {
     expect(
       isBookingWithinWorkingHours('08:30', 60),
     ).toBe(false)

@@ -17,6 +17,15 @@ import RoomDetails from './RoomDetails'
 import { getRoom } from '../../api/rooms'
 
 import type { Room } from '../../types/api'
+import { useRealtime } from '../../realtime/useRealtime'
+
+const mocks = vi.hoisted(() => ({
+  calendarMountCount: 0,
+}))
+
+vi.mock('../../realtime/useRealtime', () => ({
+  useRealtime: vi.fn(),
+}))
 
 
 vi.mock('../../api/rooms', () => ({
@@ -47,15 +56,23 @@ vi.mock('../../components/RoomCalendar', () => ({
     onBookClick,
   }: {
     onBookClick: () => void
-  }) => (
-    <div>
-      <div>Календарь комнаты</div>
+  }) => {
+    mocks.calendarMountCount += 1
 
-      <button onClick={onBookClick}>
-        Открыть бронирование
-      </button>
-    </div>
-  ),
+    return (
+      <div>
+        <div>Календарь комнаты</div>
+
+        <div data-testid="calendar-version">
+          {mocks.calendarMountCount}
+        </div>
+
+        <button onClick={onBookClick}>
+          Открыть бронирование
+        </button>
+      </div>
+    )
+  },
 }))
 
 
@@ -153,10 +170,11 @@ function renderRoomDetails() {
 describe('RoomDetails', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.calendarMountCount = 0
   })
 
 
-  it('loads and displays room information', async () => {
+  it('загрузка и отображение информации о комнате', async () => {
     vi.mocked(getRoom).mockResolvedValue(room)
 
     renderRoomDetails()
@@ -175,7 +193,7 @@ describe('RoomDetails', () => {
   })
 
 
-  it('shows error when room loading fails', async () => {
+  it('показывает ошибку если не удалось загрузить комнату', async () => {
     vi.mocked(getRoom).mockRejectedValue(
       new Error('API error'),
     )
@@ -190,7 +208,7 @@ describe('RoomDetails', () => {
   })
 
 
-  it('shows toast after successful booking', async () => {
+  it('показывает toast после успешного бронирования', async () => {
     vi.mocked(getRoom).mockResolvedValue(room)
 
     const user = userEvent.setup()
@@ -230,5 +248,133 @@ describe('RoomDetails', () => {
         'Комната Переговорная 101, 10 сентября, 15:00-16:00',
       ),
     ).toBeInTheDocument()
+  })
+
+
+  it('обновляет календарь при WebSocket событии о новом бронировании текущей комнаты', async () => {
+    vi.mocked(getRoom).mockResolvedValue(room)
+
+    renderRoomDetails()
+
+    await screen.findByText(
+      'Детали комнаты: Переговорная 101',
+    )
+
+    expect(useRealtime).toHaveBeenCalled()
+
+    const realtimeOptions = vi.mocked(
+      useRealtime,
+    ).mock.calls.at(-1)![0]
+
+    realtimeOptions.onEvent({
+      type: 'booking.created',
+      occurredAt: '2026-09-08T12:00:00.000Z',
+      data: {
+        booking: {
+          roomId: 'room-1',
+        },
+      },
+    })
+
+    await waitFor(() => {
+      expect(useRealtime).toHaveBeenCalled()
+    })
+  })
+
+
+  it('обновляет календарь при WebSocket событии booking.created для текущей комнаты', async () => {
+    vi.mocked(getRoom).mockResolvedValue(room)
+
+    renderRoomDetails()
+
+    await screen.findByText(
+      'Детали комнаты: Переговорная 101',
+    )
+
+    const initialVersion = mocks.calendarMountCount
+
+    const realtimeOptions = vi.mocked(
+      useRealtime,
+    ).mock.calls[0][0]
+
+    realtimeOptions.onEvent({
+      type: 'booking.created',
+      occurredAt: '2026-09-08T12:00:00.000Z',
+      data: {
+        booking: {
+          roomId: 'room-1',
+        },
+      },
+    })
+
+    await waitFor(() => {
+      expect(
+        mocks.calendarMountCount,
+      ).toBeGreaterThan(initialVersion)
+    })
+  })
+
+
+  it('не обновляет календарь при событии другой комнаты', async () => {
+    vi.mocked(getRoom).mockResolvedValue(room)
+
+    renderRoomDetails()
+
+    await screen.findByText(
+      'Детали комнаты: Переговорная 101',
+    )
+
+    const initialVersion = mocks.calendarMountCount
+
+    const realtimeOptions = vi.mocked(
+      useRealtime,
+    ).mock.calls[0][0]
+
+    realtimeOptions.onEvent({
+      type: 'booking.created',
+      occurredAt: '2026-09-08T12:00:00.000Z',
+      data: {
+        booking: {
+          roomId: 'another-room',
+        },
+      },
+    })
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50)
+    })
+
+    expect(
+      mocks.calendarMountCount,
+    ).toBe(initialVersion)
+  })
+
+
+  it('обновляет календарь при WebSocket событии data.reset', async () => {
+    vi.mocked(getRoom).mockResolvedValue(room)
+
+    renderRoomDetails()
+
+    await screen.findByText(
+      'Детали комнаты: Переговорная 101',
+    )
+
+    const initialVersion = mocks.calendarMountCount
+
+    const realtimeOptions = vi.mocked(
+      useRealtime,
+    ).mock.calls[0][0]
+
+    realtimeOptions.onEvent({
+      type: 'data.reset',
+      occurredAt: '2026-09-08T12:00:00.000Z',
+      data: {},
+    })
+
+    await waitFor(() => {
+      expect(
+        mocks.calendarMountCount,
+      ).toBeGreaterThan(initialVersion)
+    })
   })
 })

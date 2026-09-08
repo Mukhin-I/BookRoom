@@ -1,0 +1,19 @@
+.connection-banner {
+    background: #FEF08A;
+    width: -webkit-fill-available;
+    padding: 10px 32px;
+    border: 1px solid #FDE047;
+}
+
+.connection-text {
+    font-weight: 600;
+    font-size: 14px;
+    color: #854D0E;
+}
+
+.connection-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}

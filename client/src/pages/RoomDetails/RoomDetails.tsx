@@ -1,6 +1,6 @@
 import './RoomDetails.css'
 import { Link, useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { Room } from '../../types/api'
 import { getRoom } from '../../api/rooms'
@@ -10,6 +10,7 @@ import RoomCalendar from '../../components/RoomCalendar'
 import BookRoomModal from '../../components/BookRoomModal'
 import ToastNotification from '../../components/ToastNotification'
 import PageTitle from '../../components/PageTitle'
+import { useRealtime, type RealtimeEvent } from '../../realtime/useRealtime'
 
 export default function RoomDetails() {
   const { roomId } = useParams()
@@ -22,6 +23,30 @@ export default function RoomDetails() {
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
 
   const [toast, setToast] = useState<{ title: string; message: string } | null>(null)
+
+  const handleRealtimeEvent = useCallback((event: RealtimeEvent) => {
+    if (event.type === 'data.reset') {
+      setCalendarRefreshKey((prev) => prev + 1)
+      return
+    }
+
+    if (
+      event.type === 'booking.created' ||
+      event.type === 'booking.cancelled'
+    ) {
+      const booking = event.data.booking as {
+        roomId?: string
+      }
+
+      if (booking.roomId === roomId) {
+        setCalendarRefreshKey((prev) => prev + 1)
+      }
+    }
+  }, [roomId])
+
+  useRealtime({
+    onEvent: handleRealtimeEvent,
+  })
 
   const loadRoom = async () => {
     if (!roomId) {

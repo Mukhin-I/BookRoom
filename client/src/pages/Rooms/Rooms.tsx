@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, forwardRef } from 'react';
 import './Rooms.css';
 import Header from '../../components/Header';
 import calendarIcon from '../../assets/calendar.svg';
@@ -22,6 +22,11 @@ import { getOffices } from '../../api/offices'
 import { getRooms } from '../../api/rooms'
 
 import { useSearchParams } from 'react-router-dom'
+
+import {
+  useRealtime,
+  type RealtimeEvent,
+} from '../../realtime/useRealtime'
 
 registerLocale('ru', ru);
 
@@ -251,6 +256,38 @@ export default function Rooms() {
   const getCapacityNumber = (capacity: string): number => {
     return Number.parseInt(capacity, 10)
   }
+
+
+  const handleRealtimeEvent = useCallback(
+    (event: RealtimeEvent) => {
+      if (event.type === 'data.reset') {
+        loadRooms()
+        return
+      }
+
+      if (event.type === 'room.availability_changed') {
+        const officeId = event.data.officeId as string | undefined
+
+        if (
+          selectedOffice &&
+          officeId === selectedOffice.id
+        ) {
+          loadRooms()
+        }
+      }
+    },
+    [
+      selectedOffice,
+      selectedDate,
+      startTime,
+      duration,
+      capacity,
+    ],
+  )
+
+  useRealtime({
+    onEvent: handleRealtimeEvent,
+  })
 
 
   return (
