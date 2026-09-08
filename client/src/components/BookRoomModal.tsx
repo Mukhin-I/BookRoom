@@ -258,7 +258,7 @@ export default function BookRoomModal({
                   <input
                     type="time"
                     className="modal-input"
-                    value={startTime}
+                    placeholder="--:--"
                     onChange={(e) => setStartTime(e.target.value)}
                     min="09:00"
                     max="20:00"

@@ -415,7 +415,7 @@ export default function Rooms() {
                   type="time" 
                   placeholder="--:--" 
                   className="time-input" 
-                  value={startTime}
+                  // value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   maxLength={5}
                 /> 
