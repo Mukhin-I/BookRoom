@@ -118,7 +118,6 @@ input {
   padding-left: 38px;
 }
 
-/* Кастомный дропдаун продолжительности */
 .modal-select-field {
   width: 100%;
   padding: 10px 14px;
@@ -197,7 +196,6 @@ input {
   font-weight: 500;
 }
 
-/* Неактивный вариант длительности */
 .dropdown-item.disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -325,4 +323,89 @@ input {
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+.conflict-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(2px);
+}
+
+.conflict-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 36px 32px 28px;
+  max-width: 420px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.conflict-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.conflict-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.conflict-modal-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7280;
+  margin: 0 0 28px 0;
+}
+
+.conflict-modal-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #0D9488;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.conflict-modal-btn:hover {
+  background-color: #0f766e;
+}
+
+.conflict-modal-btn:active {
+  background-color: #115e59;
 }

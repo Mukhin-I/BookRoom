@@ -134,6 +134,7 @@ export default function RoomDetails() {
             isOpen={isBookModalOpen}
             onClose={() => setIsBookModalOpen(false)}
             room={room}
+            onScheduleRefresh={() => setCalendarRefreshKey((prev) => prev + 1)}
             onSuccess={({ roomName, dateStr, timeRangeStr }) => {
               setCalendarRefreshKey((prev) => prev + 1)
               setToast({

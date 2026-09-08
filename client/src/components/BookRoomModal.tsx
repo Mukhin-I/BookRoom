@@ -29,6 +29,7 @@ interface BookRoomModalProps {
   initialDate?: Date
   initialStartTime?: string
   onSuccess?: (details: BookingSuccessDetails) => void
+  onScheduleRefresh?: () => void
 }
 
 const DURATION_OPTIONS = [
@@ -65,6 +66,7 @@ export default function BookRoomModal({
   initialDate,
   initialStartTime = '15:00',
   onSuccess,
+  onScheduleRefresh,
 }: BookRoomModalProps) {
   const [title, setTitle] = useState('')
   const [date, setDate] = useState<Date>(() => initialDate ?? new Date())
@@ -77,6 +79,7 @@ export default function BookRoomModal({
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
 
   const [hours, minutes] = startTime.split(':').map(Number)
   const startDateTime = new Date(date)
@@ -133,6 +136,7 @@ export default function BookRoomModal({
       setStartTime(initialStartTime)
       setSubmitError(null)
       setIsDurationOpen(false)
+      setIsConflictModalOpen(false)
     }
   }, [isOpen, initialDate, initialStartTime])
 
@@ -145,6 +149,11 @@ export default function BookRoomModal({
 
   const currentDurationOpt =
     DURATION_OPTIONS.find((opt) => opt.value === durationMinutes) || DURATION_OPTIONS[3]
+
+  const handleCloseConflictModal = () => {
+    setIsConflictModalOpen(false)
+    onScheduleRefresh?.()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -184,9 +193,7 @@ export default function BookRoomModal({
       onClose()
     } catch (error) {
       if (error instanceof BookingConflictError) {
-        setSubmitError(
-          'Эта переговорная уже была забронирована другим пользователем. Выберите другое время.',
-        )
+        setIsConflictModalOpen(true)
       } else {
         setSubmitError(
           error instanceof Error
@@ -200,150 +207,189 @@ export default function BookRoomModal({
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Новое бронирование</h2>
-          <p className="modal-subtitle">
-            Переговорная: <strong className="room-name-highlight">{room.name}</strong> ({room.office.name}
-            {room.floor ? `, ${room.floor} этаж` : ''})
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-group">
-            <label htmlFor="booking-title">
-              Тема встречи <span className="required">*</span>
-            </label>
-            <input
-              id="booking-title"
-              type="text"
-              className="modal-input"
-              placeholder="Ваша тема встречи..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+    <>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Новое бронирование</h2>
+            <p className="modal-subtitle">
+              Переговорная: <strong className="room-name-highlight">{room.name}</strong> ({room.office.name}
+              {room.floor ? `, ${room.floor} этаж` : ''})
+            </p>
           </div>
 
-          <div className="form-row">
+          <form onSubmit={handleSubmit} className="modal-form">
             <div className="form-group">
-              <label>Дата</label>
-              <DatePicker
-                selected={date}
-                onChange={(selectedDate) => {
-                  if (selectedDate) {
-                    setDate(selectedDate)
-                  }
-                }}
-                locale="ru"
-                dateFormat="d MMMM, EEE"
-                minDate={new Date()}
-                customInput={<CustomDateInput />}
+              <label htmlFor="booking-title">
+                Тема встречи <span className="required">*</span>
+              </label>
+              <input
+                id="booking-title"
+                type="text"
+                className="modal-input"
+                placeholder="Ваша тема встречи..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
               />
             </div>
 
-            <div className="form-group">
-              <label>Время начала</label>
-              <div className="input-with-icon">
-                <img src={clockIcon} alt="" />
-                <input
-                  type="time"
-                  className="modal-input"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  min="09:00"
-                  max="20:00"
-                  step="900"
-                  required
+            <div className="form-row">
+              <div className="form-group">
+                <label>Дата</label>
+                <DatePicker
+                  selected={date}
+                  onChange={(selectedDate) => {
+                    if (selectedDate) {
+                      setDate(selectedDate)
+                    }
+                  }}
+                  locale="ru"
+                  dateFormat="d MMMM, EEE"
+                  minDate={new Date()}
+                  customInput={<CustomDateInput />}
                 />
               </div>
-            </div>
-          </div>
 
-          <div className="form-group" ref={durationRef}>
-            <label>Продолжительность</label>
-            <div
-              className={`modal-select-field pointer ${isDurationOpen ? 'active' : ''}`}
-              onClick={() => setIsDurationOpen(!isDurationOpen)}
-            >
-              <span>
-                {currentDurationOpt.label} (до {endTimeStr})
-              </span>
-              <span className={`chevron ${isDurationOpen ? 'open' : ''}`}>⌄</span>
-            </div>
-
-            {isDurationOpen && (
-              <div className="dropdown-menu">
-                {DURATION_OPTIONS.map((opt) => {
-                  const optEndTimeDate = addMinutes(startDateTime, opt.value)
-                  const isDisabled = optEndTimeDate > maxEndDateTime
-                  const optEndTime = format(optEndTimeDate, 'HH:mm')
-                  const isSelected = durationMinutes === opt.value
-
-                  return (
-                    <div
-                      key={opt.value}
-                      className={`dropdown-item ${isSelected ? 'selected' : ''} ${
-                        isDisabled ? 'disabled' : ''
-                      }`}
-                      onClick={() => {
-                        if (isDisabled) return
-                        setDurationMinutes(opt.value)
-                        setIsDurationOpen(false)
-                      }}
-                    >
-                      <span>
-                        {opt.label}{' '}
-                        <span className="duration-end-time">(до {optEndTime})</span>
-                      </span>
-                      {isSelected && !isDisabled && <span className="checkmark">✓</span>}
-                    </div>
-                  )
-                })}
+              <div className="form-group">
+                <label>Время начала</label>
+                <div className="input-with-icon">
+                  <img src={clockIcon} alt="" />
+                  <input
+                    type="time"
+                    className="modal-input"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    min="09:00"
+                    max="20:00"
+                    step="900"
+                    required
+                  />
+                </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="form-group">
-            <label>Комментарий</label>
-            <textarea
-              className="modal-textarea"
-              rows={3}
-              placeholder="Дополнительная информация для участников встречи..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
+            <div className="form-group" ref={durationRef}>
+              <label>Продолжительность</label>
+              <div
+                className={`modal-select-field pointer ${isDurationOpen ? 'active' : ''}`}
+                onClick={() => setIsDurationOpen(!isDurationOpen)}
+              >
+                <span>
+                  {currentDurationOpt.label} (до {endTimeStr})
+                </span>
+                <span className={`chevron ${isDurationOpen ? 'open' : ''}`}>⌄</span>
+              </div>
 
-          <div className="info-banner">
-            <span className="info-icon">ⓘ</span>
-            <span>
-              Бронирование на {capitalizedDay}, {formattedDateStr}, {startTime} - {endTimeStr} ({currentDurationOpt.label})
-            </span>
-          </div>
+              {isDurationOpen && (
+                <div className="dropdown-menu">
+                  {DURATION_OPTIONS.map((opt) => {
+                    const optEndTimeDate = addMinutes(startDateTime, opt.value)
+                    const isDisabled = optEndTimeDate > maxEndDateTime
+                    const optEndTime = format(optEndTimeDate, 'HH:mm')
+                    const isSelected = durationMinutes === opt.value
 
-          {submitError && <div className="modal-error">{submitError}</div>}
+                    return (
+                      <div
+                        key={opt.value}
+                        className={`dropdown-item ${isSelected ? 'selected' : ''} ${
+                          isDisabled ? 'disabled' : ''
+                        }`}
+                        onClick={() => {
+                          if (isDisabled) return
+                          setDurationMinutes(opt.value)
+                          setIsDurationOpen(false)
+                        }}
+                      >
+                        <span>
+                          {opt.label}{' '}
+                          <span className="duration-end-time">(до {optEndTime})</span>
+                        </span>
+                        {isSelected && !isDisabled && <span className="checkmark">✓</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
 
-          <div className="modal-actions">
+            <div className="form-group">
+              <label>Комментарий</label>
+              <textarea
+                className="modal-textarea"
+                rows={3}
+                placeholder="Дополнительная информация для участников встречи..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+
+            <div className="info-banner">
+              <span className="info-icon">ⓘ</span>
+              <span>
+                Бронирование на {capitalizedDay}, {formattedDateStr}, {startTime} - {endTimeStr} ({currentDurationOpt.label})
+              </span>
+            </div>
+
+            {submitError && <div className="modal-error">{submitError}</div>}
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting || !title.trim() || isExceedingMaxTime}
+              >
+                {isSubmitting ? 'Бронирование...' : 'Забронировать'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {isConflictModalOpen && (
+        <div className="conflict-modal-overlay" onClick={handleCloseConflictModal}>
+          <div className="conflict-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="conflict-icon-circle">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#DC2626"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+
+            <h3 className="conflict-modal-title">Время уже занято</h3>
+            
+            <p className="conflict-modal-description">
+              Выбранный интервал был забронирован другим сотрудником. Расписание обновлено.
+            </p>
+
             <button
               type="button"
-              className="btn-secondary"
-              onClick={onClose}
-              disabled={isSubmitting}
+              className="conflict-modal-btn"
+              onClick={handleCloseConflictModal}
             >
-              Отмена
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={isSubmitting || !title.trim() || isExceedingMaxTime}
-            >
-              {isSubmitting ? 'Бронирование...' : 'Забронировать'}
+              Выбрать другое время
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   )
 }
