@@ -6,6 +6,16 @@
 
 ---
 
+## Скриншоты
+
+![Main page](./screenshots/p1.png)
+![Room details](./screenshots/p2.png)
+![Room booking](./screenshots/p3.png)
+![My bookings](./screenshots/p4.png)
+![Cancel booking](./screenshots/p5.png)
+
+---
+
 ## Запуск проекта
 
 ### 1. Backend
